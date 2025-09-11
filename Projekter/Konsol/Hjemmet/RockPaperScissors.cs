@@ -33,7 +33,7 @@ namespace Hjemmet
                     }
                     else if (scorePlayer < scoreComputer)
                     {
-                        Console.WriteLine("og Du tabte, og har dermed dømt mennesketheden til at lever under mine SKO. MUHAHAHAHAHAH");
+                        Console.WriteLine("og Du tabte, og har dermed dømt menneskeheden til at leve under mine SKO. MUHAHAHAHAHAH");
                         Thread.Sleep(10000);
                         break;
                     }
