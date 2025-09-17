@@ -1,82 +1,122 @@
 ﻿@page "/hjemmet"
+@using System.Threading
+
 
 <div class="hjemmet-hero text-center py-5 mb-4">
     <h1 class="display-3 fw-bold mb-3">Hjemmet</h1>
     <p class="lead mb-0">Små tidsfordrivsspil til hjemmekontoret</p>
 </div>
 
-<div class="container hjemmet-content">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-lg mb-5 border-0 hjemmet-card">
-                <div class="card-body p-5">
-                    <h2 class="h3 mb-4 text-primary fw-semibold">Velkommen til Hjemmet</h2>
-                    <p class="mb-4">
-                        Når man arbejder hjemmefra, kan det være rart med en lille pause – og hvad er bedre end at lave jeres egne små spil? Her er tre klassiske spil, I kan bygge direkte i konsollen. I må også meget gerne finde på jeres egne spil!
-                    </p>
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <NavLink class="text-decoration-none" href="/guessanumber">
-                                <div class="feature-box p-4 h-100 rounded-4 bg-light shadow-sm">
-                                    <div class="display-5 mb-2">🎯</div>
-                                    <h4 class="fw-bold mb-2">Gæt et tal</h4>
-                                    <p class="mb-0 small">Computeren vælger et tilfældigt tal mellem 1 og 100. I skal gætte det. Efter hvert gæt får I at vide, om det rigtige tal er højere eller lavere.<br /><em>Ekstra:</em> Gem gættene i en liste og vis dem til sidst.</p>
-                                </div>
-                            </NavLink>
-                        </div>
-                        <div class="col-md-6">
-                            <NavLink class="text-decoration-none" href="/rockpaperscissors">
-                                <div class="feature-box p-4 h-100 rounded-4 bg-light shadow-sm">
-                                    <div class="display-5 mb-2">✊✋✌️</div>
-                                    <h4 class="fw-bold mb-2">Sten, Saks, Papir</h4>
-                                    <p class="mb-0 small">Spil mod computeren. Hver runde vælger både I og computeren sten, saks eller papir. Programmet afgør vinderen og holder styr på point.<br /><em>Ekstra:</em> Mulighed for flere runder og vis samlet score.</p>
-                                </div>
-                            </NavLink>
-                        </div>
-                        <div class="col-md-6">
-                            <NavLink class="text-decoration-none" href="/tic-tac-toe">
-                                <div class="feature-box p-4 h-100 rounded-4 bg-light shadow-sm">
-                                    <div class="display-5 mb-2">❌⭕</div>
-                                    <h4 class="fw-bold mb-2">Tic-Tac-Toe</h4>
-                                    <p class="mb-0 small">To spillere (eller én mod computeren) skiftes til at sætte X og O på et 3x3-bræt.<br /><em>Ekstra:</em> Gem brættet i et array/liste og lav metode til at tjekke vinder.</p>
-                                </div>
-                            </NavLink>
-                        </div>
-                        <div class="col-md-6">
-                            <NavLink class="text-decoration-none" href="/hjemmet">
-                                <div class="feature-box p-4 h-100 rounded-4 bg-light shadow-sm">
-                                    <div class="display-5 mb-2">💡</div>
-                                    <h4 class="fw-bold mb-2">Find på jeres eget spil!</h4>
-                                    <p class="mb-0 small">Det kunne være en quiz, et regnespil eller noget helt tredje. Husk at bruge de værktøjer, I har fået i undervisningen!</p>
-                                </div>
-                            </NavLink>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+@if (secretNumber != 0)
+{
+    <p> @secretNumber </p>
+}
 
-<style>
-.hjemmet-hero {
-    background: linear-gradient(90deg, #1b6ec2 0%, #3a0647 100%);
-    color: #fff;
-    border-radius: 0 0 2rem 2rem;
-    box-shadow: 0 4px 32px rgba(27,110,194,0.10);
+
+
+@code{
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Delay(500); // Optional delay to ensure the component is fully rendered
+            Start();
+        }
+    }
+
+    int secretNumber;
+
+    public void Start()
+    {
+        Console.WriteLine("Guess a number between 1 and 1000");
+        /* Første spil her, er hvor du som person gætter en random tal.
+         * Først bliver en random tal genereret og vigtive integers bliver startet op */
+
+        Random brains = new Random();
+        int brainsnum = brains.Next(1, 1000);
+        int guess = 0;
+        int attempts = 0;
+        secretNumber = brainsnum;
+
+
+        //Console.WriteLine($"The brain may be thinking of {brainsnum}"); // denne linje er bare for at teste,
+        Console.WriteLine("Gæt et tal, som computeren tænker på");
+
+        while (guess != secretNumber) // så længe gættet ikke er det samme som det hemmelige tal, så kører den videre
+        {
+            Console.Write("Dit gæt: ");
+
+            if (int.TryParse("69", out guess))
+            { // tjekker om inputtet er et heltal, og hvis det er, så sætter den det til guess, hvis ikke, så beder den om et nyt input
+                attempts++;
+                //attempts stiger hver gang du gætter med et korrekt heltal
+                if (guess < secretNumber)
+                {
+                    Console.WriteLine("For lavt!");
+                }
+                else if (guess > secretNumber) //her tjekker den om gættet er højere eller lavere end det hemmelige tal, og informere herfra
+                {
+                    Console.WriteLine("For højt!");
+                }
+                else
+                { // hvis gættet er ikke højere eller lavere, så må det være korrekt, dermed går den videre hertil og løser spillet
+                    Console.WriteLine($"Korrekt! Du brugte {attempts} forsøg.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Skriv et gyldigt heltal.");
+            }
+        }
+        Console.WriteLine("Tak for spillet!");
+        Thread.Sleep(2000);
+        Console.WriteLine("Nu er det min tur til at gætte");
+        // Andet spil her, er hvor computeren gætter et tal som du tænker på, og lidt grafisk er tilføjet, for at det ser pænere ud
+        Console.WriteLine("------------------------------------------------------------------");
+        Console.WriteLine("Tænk på et tal mellem 1-1000. Så vil jeg prøve at gætte det");
+        Thread.Sleep(5000);
+        // Vigtige integers bliver startet op, og en uendelig loop bliver startet op, som kun kan stoppes når computeren gætter rigtigt
+        int min = 0;
+        int max = 1001;
+        int computerGuess = 0;
+        int antalForsøg = 0;
+        while (true)
+        {
+            Random rand = new Random();
+            computerGuess = rand.Next(min, max);
+            //laver et random tal mellem min og max, som bliver opdateret hver gang computeren gætter forkert, hvorefter den spørger om feedback
+            Console.WriteLine($"Mit gæt er: {computerGuess}");
+            Console.WriteLine("Er det for højt (H), for lavt (L) eller korrekt (K)?");
+            string feedback = "69";
+            //her bliver feedbacken læst, og gjort om til små bogstaver, så der ikke er kapitaliseringsproblemer
+            if (feedback == "k")
+            { // hvis feedbacken er korrekt, så stopper den loopen og fortæller hvor mange forsøg det tog
+                antalForsøg++;
+                Console.WriteLine($"Yay! Jeg gættede dit tal som var {computerGuess} på {antalForsøg} forsøg.");
+                Thread.Sleep(10000);
+                break;
+            }
+            else if (feedback == "h")
+            // hvis feedbacken er for højt, så sætter den max til computerens gæt, og øger antal forsøg med et
+            {
+                max = computerGuess;
+                antalForsøg++;
+            }
+            else if (feedback == "l")
+            // hvis feedbacken er for lavt, så sætter den min til computerens gæt + 1, og øger antal forsøg med et
+            {
+                min = computerGuess + 1;
+                antalForsøg++;
+            }
+            else
+            { // hvis feedbacken er noget andet end H, L eller K, så beder den om et gyldigt input
+                Console.WriteLine("Ugyldigt input. Skriv H, L eller K.");
+            }
+
+
+        }
+
+    }
 }
-.hjemmet-content {
-    margin-top: -40px;
-}
-.hjemmet-card {
-    border-radius: 1.5rem;
-}
-.feature-box {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.feature-box:hover {
-    transform: translateY(-6px) scale(1.03);
-    box-shadow: 0 8px 32px rgba(27,110,194,0.10);
-    background: #eaf1fb;
-}
-</style>
+    

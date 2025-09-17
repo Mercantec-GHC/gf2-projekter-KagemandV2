@@ -8,7 +8,7 @@ namespace Opgaver
         {
             Console.WriteLine("------------------------------------------");
             Console.WriteLine("Velkommen til opgaver omkring Loops både med og uden datastrukturer!");
-            Loop1();
+            //Loop1();
             Loop2();
             Loop3();
             Loop4();
@@ -41,6 +41,13 @@ namespace Opgaver
             Console.WriteLine("Opgave 3:");
             Console.WriteLine("Brug et loop til at lægge alle tal fra 1 til 100 sammen og udskriv resultatet.");
             // Lav opgaven herunder!
+            int sum = 0;
+            for (int i = 1; i <= 100; i++)
+            {
+                sum += i;
+            }
+            Console.WriteLine($"Summen af alle tal fra 1 til 100 er: {sum}");
+
         }
 
         public static void Loop4()
@@ -55,6 +62,24 @@ namespace Opgaver
             Console.WriteLine("Opgave 5:");
             Console.WriteLine("Bed brugeren om at indtaste et tal. Brug et loop til at udskrive alle tal fra det indtastede tal og ned til 1.");
             // Lav opgaven herunder!
+            while (true)
+            {
+                Console.Write("Indtast et tal: ");
+                string input = Console.ReadLine();
+                if (int.TryParse(input, out int tal) && tal > 0)
+                {
+                    for (int i = tal; i >= 1; i--)
+                    {
+                        Console.WriteLine(i);
+                    }
+                    break; // Afslut loopet efter korrekt indtastning og udskrivning
+                }
+                else
+                {
+                    Console.WriteLine("Ugyldigt input. Prøv igen.");
+                }
+            }
+
         }
 
         public static void Loop6()
@@ -70,6 +95,18 @@ namespace Opgaver
             Console.WriteLine("Opgave 7:");
             Console.WriteLine("Brug et loop til at tælle, hvor mange gange bogstavet 'a' optræder i en tekst, som brugeren indtaster.");
             // Lav opgaven herunder!
+            char bogstav = 'a';
+            Console.Write("Indtast en tekst: ");
+            string tekst = Console.ReadLine();
+            int count = 0;
+            foreach (char c in tekst)
+            {
+                if (char.ToLower(c) == bogstav)
+                {
+                    count++;
+                }
+            }
+            Console.WriteLine($"Bogstavet '{bogstav}' optræder {count} gange i den indtastede tekst.");
         }
 
         public static void Loop8()
@@ -84,6 +121,20 @@ namespace Opgaver
             Console.WriteLine("Opgave 9:");
             Console.WriteLine("Bed brugeren om at indtaste 5 tal (ét ad gangen). Brug et loop til at lægge dem sammen og udskriv summen til sidst.");
             // Lav opgaven herunder!
+            for (int i = 1; i <= 5; i++)
+            {
+                Console.Write($"Indtast tal {i}: ");
+                string input = Console.ReadLine();
+                if (int.TryParse(input, out int tal))
+                {
+                    // Her kan du lægge tallene sammen
+                }
+                else
+                {
+                    Console.WriteLine("Ugyldigt input. Prøv igen.");
+                    i--; // Gør det muligt at indtaste tallet igen
+                }
+            }
         }
 
         public static void Loop10()
@@ -99,6 +150,27 @@ namespace Opgaver
             Udskriv 'Banke' hvis tallet er deleligt med 3, 'Bøf' hvis tallet er deleligt med 5 
             og 'BankeBøf' hvis tallet er deleligt med både 3 og 5.");
             // Lav opgaven herunder!
+            
+            for (int i = 1; i <= 30; i++)
+            {
+                Thread.Sleep(300); 
+                if (i % 3 == 0 && i % 5 == 0)
+                {
+                    Console.WriteLine("BankeBøf");
+                }
+                else if (i % 3 == 0)
+                {
+                    Console.WriteLine("Banke");
+                }
+                else if (i % 5 == 0)
+                {
+                    Console.WriteLine("Bøf");
+                }
+                else
+                {
+                    Console.WriteLine(i);
+                }
+            }
         }
         public static void MiniProjektLommeregner()
         {
