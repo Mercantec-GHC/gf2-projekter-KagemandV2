@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Enterprice;
 using Hjemmet;
 using Kontoret;
-using Enterprice;
 
 bool run = true;
 while (run)

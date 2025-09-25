@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Hjemmet
+﻿namespace Hjemmet
 {
     public class TicTacToe
     {
@@ -13,7 +11,7 @@ namespace Hjemmet
             bool gameWon = false; // tjekker om spillet er vundet
             Random rng = new Random(); // random nummer generator til maskinens træk
 
-            while (moves < 9 && !gameWon) 
+            while (moves < 9 && !gameWon)
             {
                 // Tegner bordet. Dette gælder kun, mens man er under 9 moves, og spillet ikker er vundet
                 Console.Clear();
@@ -27,7 +25,7 @@ namespace Hjemmet
 
                 int choice = -1; // initialiserer choice til et ugyldigt tal
 
-                if (currentPlayer == 'X') 
+                if (currentPlayer == 'X')
                 {
                     // Menneskets tur
                     Console.WriteLine($"\nSpiller {currentPlayer}, vælg et felt (1-9): "); // beder spilleren om at vælge et felt
@@ -84,7 +82,7 @@ namespace Hjemmet
                 for (int i = 0; i < winConditions.GetLength(0); i++) // tjekker alle vinde betingelser
                 {
                     if (board[winConditions[i, 0]] == currentPlayer &&  // hvis en af betingelserne er opfyldt, så vinder den spiller
-                        board[winConditions[i, 1]] == currentPlayer && 
+                        board[winConditions[i, 1]] == currentPlayer &&
                         board[winConditions[i, 2]] == currentPlayer)
                     {
                         Console.Clear();

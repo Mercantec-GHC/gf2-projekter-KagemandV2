@@ -17,7 +17,7 @@ namespace Hjemmet
 
             //Console.WriteLine($"The brain may be thinking of {brainsnum}"); // denne linje er bare for at teste,
             Console.WriteLine("Gæt et tal, som computeren tænker på");
-            
+
             while (guess != secretNumber) // så længe gættet ikke er det samme som det hemmelige tal, så kører den videre
             {
                 Console.Write("Dit gæt: ");
@@ -88,10 +88,10 @@ namespace Hjemmet
                 { // hvis feedbacken er noget andet end H, L eller K, så beder den om et gyldigt input
                     Console.WriteLine("Ugyldigt input. Skriv H, L eller K.");
                 }
-                
+
 
             }
 
-            }
+        }
     }
 }
