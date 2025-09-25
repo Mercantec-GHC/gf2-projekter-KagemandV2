@@ -4,7 +4,7 @@
     {
         public void Start()
         {
-            Console.WriteLine("⚙️ Tic-Tac-Toe mod MIG; Den bedste Maskin Ånd!");
+            Console.WriteLine("Tic-Tac-Toe mod MIG; Den bedste Maskin Ånd!");
             char[] board = { '1', '2', '3', '4', '5', '6', '7', '8', '9' }; // starter bordet op
             char currentPlayer = 'X'; // mennesket starter
             int moves = 0; // tæller antal moves
@@ -63,7 +63,7 @@
                         choice = rng.Next(1, 10); // 1–9
                     } while (board[choice - 1] == 'X' || board[choice - 1] == 'O'); // tjekker om feltet er optaget
 
-                    Console.WriteLine($"⚙️ Maskinånd vælger felt {choice}");
+                    Console.WriteLine($"Maskinånd vælger felt {choice}");
                     System.Threading.Thread.Sleep(1000);
                 }
 

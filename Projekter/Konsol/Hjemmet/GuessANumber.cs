@@ -15,10 +15,10 @@ namespace Hjemmet
             int secretNumber = brainsnum;
 
 
-            //Console.WriteLine($"The brain may be thinking of {brainsnum}"); // denne linje er bare for at teste,
+            Console.WriteLine($"The brain may be thinking of {brainsnum}"); // denne linje er bare for at teste,
             Console.WriteLine("Gæt et tal, som computeren tænker på");
 
-            while (guess != secretNumber) // så længe gættet ikke er det samme som det hemmelige tal, så kører den videre
+            while (guess !=     secretNumber) // så længe gættet ikke er det samme som det hemmelige tal, så kører den videre
             {
                 Console.Write("Dit gæt: ");
 
