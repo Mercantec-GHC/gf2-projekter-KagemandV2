@@ -41,6 +41,13 @@ namespace Opgaver
             Console.WriteLine("Opgave 1 (Grundlæggende method):");
             Console.WriteLine("Lav en method der udskriver 'Hej verden!' og kald den fra denne method.");
             // Lav opgaven herunder!
+            public static void SayHello()
+            {
+            Console.WriteLine("Hej verden!");
+            }
+
+        SayHello();
+
         }
 
         public static void Method2()
