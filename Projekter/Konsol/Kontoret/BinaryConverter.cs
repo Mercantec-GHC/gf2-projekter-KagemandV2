@@ -5,11 +5,13 @@ namespace Kontoret
         public void Start()
         {
             bool running = true;
+            Console.Clear();
+            Console.WriteLine("1. Decimal/IPv4 to Binary\n2. Binary/IPv4 to Decimal\n3. Exit");
 
             while (running) //while løkken kører indtil brugeren vælger at afslutte
             {
-                Console.Clear();
-                Console.WriteLine("1. Decimal/IPv4 to Binary\n2. Binary/IPv4 to Decimal\n3. Exit");
+                
+                
                 // Menuen for programmet, og beder brugeren om at vælge en mulighed
                 string choice = "";
                 while (choice != "1" && choice != "2" && choice != "3")
@@ -72,6 +74,7 @@ namespace Kontoret
             {
                 result = (number % 2) + result;
                 number /= 2;
+                // Magic Code, hehe
             }
             return result;
         }
@@ -115,6 +118,14 @@ namespace Kontoret
             }
 
             return string.Join(".", decimalParts);
+        }
+        public void gæt()
+        {
+            Random random = new Random();
+            int numberToGuess = random.Next(1, 256);
+            int konvertion = random.Next(1, 3);
+
+            
         }
     }
 }
