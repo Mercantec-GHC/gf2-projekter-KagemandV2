@@ -1,113 +1,158 @@
+using System;
+using System.Diagnostics;
+using System.Threading;
 namespace Kontoret
 {
     public class BinaryConverter
     {
         public void Start()
         {
+            // Boolean der styrer hovedløkken
             bool running = true;
-            Console.Clear();
-            Console.WriteLine("1. Decimal/IPv4 to Binary\n2. Binary/IPv4 to Decimal\n3. Exit");
+           
 
-            while (running) //while løkken kører indtil brugeren vælger at afslutte
+
+            // Udskriver menuen første gang
+            Console.Clear();
+            Console.WriteLine("1. Base10/IPv4 to Binary\n2. Binary/IPv4 to Base10\n3. The Game!!!\n4. Exit");
+
+            // Programmet kører i en while-løkke indtil brugeren vælger "Exit"
+            while (running)
             {
-                
-                
-                // Menuen for programmet, og beder brugeren om at vælge en mulighed
+                // Brugerens menuvalg
                 string choice = "";
-                while (choice != "1" && choice != "2" && choice != "3")
-                { // tjekker om inputtet er 1, 2 eller 3, og hvis ikke, så beder den om et nyt input
-                    Console.Write("Choose an option (1-3): ");
+
+                // Bliver ved med at spørge indtil der tastes 1, 2, 3 eller 4
+                while (choice != "1" && choice != "2" && choice != "3" && choice != "4")
+                {
+                    Console.Write("Vælg en mulighed (1-4): ");
                     choice = Console.ReadLine();
                 }
 
+                // Switch håndterer brugerens valg
                 switch (choice)
-                { // switch statement til at håndtere de forskellige muligheder, og kalder de relevante metoder baseret på brugerens valg
+                {
+                    // Valg 1: Base10 eller IPv4 → Binary
                     case "1":
-                        Console.Write("Enter a number or IPv4 address: "); // beder brugeren om at indtaste et tal, som kan være et heltal eller en IPv4 adresse
-                        string decimalInput = RemoveNonNumericOrDot(Console.ReadLine()); // fjerner alle ikke-numeriske tegn undtagen '.'
+                        Console.Write("Indtast et tal eller en IPv4 adresse i Base10: ");
 
-                        if (decimalInput.Contains('.')) // tjekker om inputtet indeholder en '.', hvilket indikerer at det er en IPv4 adresse
-                        {//og aktiverer den relevante metode til at konvertere IPv4 til binær
-                            Console.WriteLine($"\nDecimal IPv4 {decimalInput} Binary IPv4 {IPv4ToBinary(decimalInput)}");
+                        // Rens inputtet så kun tal og punktummer er tilladt
+                        string decimalInput = RemoveNonNumericOrDot(Console.ReadLine());
+
+                        // Hvis input indeholder punktum, behandler vi det som en IPv4-adresse
+                        if (decimalInput.Contains('.'))
+                        {
+                            Console.WriteLine($"\nBase10 IPv4 {decimalInput} konverteres til Binary IPv4 {IPv4ToBinary(decimalInput)}");
                         }
                         else
-                        { // ellers antager den at det er et heltal og konverterer det til binær
+                        {
+                            // Ellers er det et enkelt heltal
                             if (int.TryParse(decimalInput, out int decimalNumber))
-                                Console.WriteLine($"\nDecimal {decimalNumber} konveteres til Binary {DecimalToBinary(decimalNumber)}");
+                                Console.WriteLine($"\nBase10 {decimalNumber} konverteres til Binary {DecimalToBinary(decimalNumber)}");
                         }
                         break;
 
-                    case "2": // beder brugeren om at indtaste en binær kode eller en binær IPv4 adresse
-                        Console.Write("Enter a binær code or binær IPv4: ");
-                        string binaryInput = RemoveNonNumericOrDot(Console.ReadLine()); // fjerner alle ikke-numeriske tegn undtagen '.'
+                    // Valg 2: Binary eller Binary-IPv4 → Base10
+                    case "2":
+                        Console.Write("Indtast et Binært tal eller en Binær IPv4 adresse ");
 
-                        if (binaryInput.Contains('.')) // tjekker om inputtet indeholder en '.', hvilket indikerer at det er en binær IPv4 adresse
-                            Console.WriteLine($"\nBinary IPv4 {binaryInput} konveteres til Decimal IPv4 {BinaryToIPv4(binaryInput)}");
-                        else // ellers antager den at det er en binær kode og konverterer det til et heltal
-                            Console.WriteLine($"\nBinary {binaryInput} konveteres til Decimal {BinaryToDecimal(binaryInput)}");
+                        string binaryInput = RemoveNonNumericOrDot(Console.ReadLine());
+
+                        // Hvis der er punktummer, antages det at være en IPv4 i binær
+                        if (binaryInput.Contains('.'))
+                            Console.WriteLine($"\nBinær IPv4 {binaryInput} konverteres til Base10 IPv4 {BinaryToIPv4(binaryInput)}");
+                        else
+                            // Ellers er det et enkelt binært tal
+                            Console.WriteLine($"\nBinær {binaryInput} konverteres til Base10 {BinaryToDecimal(binaryInput)}");
                         break;
 
-                    case "3": // afslutter programmet ved at sætte running til false
+                    // Valg 3: Starter et lille gæt-spil
+                    case "3":
+                        gæt();
+                        break;
+
+                    // Valg 4: Afslutter programmet
+                    case "4":
                         running = false;
-                        continue;
+                        break;
                 }
 
+                // Pause inden næste iteration
                 Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();
             }
         }
 
-        private static string RemoveNonNumericOrDot(string input) //metode til at fjerne alle ikke-numeriske tegn undtagen '.'
+        // Fjerner alt fra input der ikke er tal eller punktummer
+        private static string RemoveNonNumericOrDot(string input)
         {
             if (string.IsNullOrEmpty(input))
                 return "";
 
-            char[] allowedChars = input.Where(c => char.IsDigit(c) || c == '.').ToArray(); // bruger LINQ til at filtrere tegnene og beholder kun cifre og '.'
+            char[] allowedChars = input.Where(c => char.IsDigit(c) || c == '.').ToArray();
             return new string(allowedChars);
         }
 
-        public static string DecimalToBinary(int number) //metode til at konvertere et heltal til binær
+        // Konverterer et heltal til binær streng
+        public static string DecimalToBinary(int number)
         {
-            if (number == 0) return "0"; //håndterer specialtilfældet hvor tallet er 0
+            if (number == 0) return "0";
+
             string result = "";
-            while (number > 0) // konverterer tallet til binær ved at dividere det med 2 og gemme resten
+
+            // Finder binær repræsentation ved gentagne divisioner med 2
+            while (number > 0)
             {
+                // Tilføjer resten (0 eller 1) foran resultatet, baseret på modulus
                 result = (number % 2) + result;
+                //rykker tallet ned ved at dividere med 2
                 number /= 2;
-                // Magic Code, hehe
             }
+            
             return result;
         }
-
+          
+        // Konverterer en binær streng til heltal
         public static int BinaryToDecimal(string binær)
         {
-            int result = 0, power = 1; //metode til at konvertere en binær streng til et heltal
-            for (int i = binær.Length - 1; i >= 0; i--) //går igennem strengen fra højre mod venstre og beregner værdien baseret på positionen
+            int result = 0;
+            int power = 1;
+
+            // Starter fra højre mod venstre
+            for (int i = binær.Length - 1; i >= 0; i--)
             {
-                if (binær[i] == '1') result += power; //hvis tegnet er '1', så lægger den den nuværende power til resultatet
-                power *= 2; //opdaterer power ved at multiplicere den med 2 for hver position, da binær er base 2
+                // Hvis bit er '1', tilføj den aktuelle 2^n værdi
+                if (binær[i] == '1')
+                    result += power;
+
+                // Gang vægten med 2 for næste bit
+                power *= 2;
             }
+
             return result;
         }
 
+        // Konverterer en IPv4 (fx 192.168.0.1) til binær IPv4
         public static string IPv4ToBinary(string ipv4)
-        {//metode til at konvertere en IPv4 adresse til binær
-            string[] parts = ipv4.Split('.'); //splitter adressen op i dens fire oktetter, eller hvor mange der nu er
-            string[] binaryParts = new string[parts.Length]; //opretter et array til at holde de binære repræsentationer af hver oktet
+        {
+            // Splitter IPv4 adressen i dens 4 oktetter og laver en array til binære repræsentationer
+            string[] parts = ipv4.Split('.');
+            string[] binaryParts = new string[parts.Length];
 
-            for (int i = 0; i < parts.Length; i++) //går igennem hver del, konverterer den til et heltal, derefter til binær, 
-            {//og sørger for at den er 8 bits lang ved at padde med nuller foran hvis nødvendigt, da en oktet altid er 8 bits
-                //koden er dog sat op til at håndtere flere eller færre end 4 oktetter, og mere end 255 i hver oktet
-                int number = int.Parse(parts[i]);//konverterer strengen til et heltal
-                string binær = DecimalToBinary(number).PadLeft(8, '0'); //Konvetere til heltal, ved at kalde DecimalToBinary metoden
-                binaryParts[i] = binær; //gemmer den binære repræsentation i arrayet
+            for (int i = 0; i < parts.Length; i++)
+            {
+                int number = int.Parse(parts[i]);
+
+                // Hver oktet repræsenteres på 8 bits
+                string binær = DecimalToBinary(number).PadLeft(8, '0'); ;
+                binaryParts[i] = binær;
             }
 
-            return string.Join(".", binaryParts);//samler de binære oktetter tilbage til en enkelt streng adskilt af punktummer
+            return string.Join(".", binaryParts);
         }
-
+         // Konverterer en binær IPv4 til en decimal IPv4
         public static string BinaryToIPv4(string binaryIP)
-        { //gør det samme som IPv4ToBinary, bare den anden vej rundt, og fra binær af
+        {
             string[] parts = binaryIP.Split('.');
             string[] decimalParts = new string[parts.Length];
 
@@ -119,13 +164,114 @@ namespace Kontoret
 
             return string.Join(".", decimalParts);
         }
+
+        // Lille spil hvor brugeren skal gætte korrekt konvertering
         public void gæt()
         {
             Random random = new Random();
-            int numberToGuess = random.Next(1, 256);
-            int konvertion = random.Next(1, 3);
+            //initialisere stopwatch til at tage tid med
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Reset();
 
-            
+            int successfulAttempts = 0;
+            Console.WriteLine("Du har valgt THE GAME");
+            Console.WriteLine("Konverter det givne tal til enten binær eller Base10 tal");
+            Console.WriteLine("du har 30 + 5 sekunder for hvert korrekt spørgsmål");
+            Thread.Sleep(4000);
+            stopwatch.Start();
+            int tid = 30;
+            while (stopwatch.Elapsed.TotalSeconds < tid)
+            {
+                //giver tid tilbage til brugeren
+                Console.WriteLine($"Tid tilbage: {tid - (int)stopwatch.Elapsed.TotalSeconds} sekunder");
+                Console.WriteLine("\n---------------------------------------------------------------------------\n");
+
+                // Tilfældigt tal mellem 1 og 255
+                int numberToGuess = random.Next(1, 256);
+
+                // 1 = Decimal til Binær, 2 = Binær til Decimal
+                int konvertion = random.Next(1, 3);
+
+                int attempts = 1;
+                bool fail = false;
+
+                
+
+                switch (konvertion)
+                {
+                    case 1:
+                        // Decimal til Binær
+                        Console.WriteLine($"\nKonvetere {numberToGuess} til Binær");
+                        string userInputBinary = Console.ReadLine();
+                        // Korrekt binær løsning for det tilfældige tal
+                        string correctBinary = DecimalToBinary(numberToGuess).PadLeft(8, '0');
+
+                        // Bruger skal gætte korrekt binær streng
+                        while (userInputBinary != correctBinary)
+                        {
+                            Console.WriteLine("Forkert. Prøv igen.");
+                            
+                            attempts++;
+                            if (stopwatch.Elapsed.TotalSeconds > tid)
+                            {
+                                fail = true;
+                                
+                                break;
+                                
+
+                            }
+                            userInputBinary = Console.ReadLine();
+                        }
+                        if (fail == false || (fail == true && userInputBinary == correctBinary))
+                        {
+                            successfulAttempts++;
+                            tid += 5;
+                            Console.WriteLine($"Korrekt! Du svarede  rigtigt med {correctBinary} på {attempts} forsøg");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Tiden er oppe. Det rigtige svar var {correctBinary}. Bedre held næste gang");
+                        }
+                            break;
+
+                    case 2:
+                        // Binær til Decimal
+                        Console.WriteLine($"Konvetere {DecimalToBinary(numberToGuess).PadLeft(8, '0')} til Base10");
+                       
+                        if (stopwatch.Elapsed.TotalSeconds > tid)
+                        {
+                            fail = true;
+
+                            break;
+
+
+                        }
+
+                        string userInputDecimal = Console.ReadLine();
+
+                        // Bruger skal gætte korrekt decimaltal
+                        while (userInputDecimal != numberToGuess.ToString())
+                        {
+                            Console.WriteLine("Forkert. Prøv igen.");
+                            userInputDecimal = Console.ReadLine();
+                            attempts++;
+                        }
+                        if (fail == false || (fail == true && userInputDecimal == numberToGuess.ToString()))
+                        {
+                            successfulAttempts++;
+                            tid += 5;
+                            Console.WriteLine($"Korrekt! Du svarede rigtigt med {numberToGuess} på {attempts} antal forsøg");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Tiden er oppe. Det rigtige svar var {numberToGuess}. Bedre held næste gang");
+                        }
+                            break;
+                }
+            }
+            stopwatch.Stop();
+            Console.WriteLine($"Du svarede rigtigt på {successfulAttempts} konversioner på {stopwatch.Elapsed.TotalSeconds} sekunder. Godt gået!! ");
+
         }
     }
 }

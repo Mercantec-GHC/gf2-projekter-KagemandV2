@@ -2,44 +2,171 @@
 
 <div class="office-hero text-center py-5 mb-4">
     <h1 class="display-4 fw-bold mb-3">Binærkodeomformer</h1>
-    <p class="lead mb-0">Konverter mellem decimal, binær og hexadecimal – og lær om talbaser!</p>
+    <p class="lead mb-0">Konverter mellem Decimal, Binær og IPv4 – styret af maskinånden!</p>
 </div>
 
+<div class="container py-4">
+    <div class="row g-4">
+        <!-- Base10/IPv4 → Binary -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Base10 eller IPv4 → Binær</h5>
+                    <input class="form-control mb-2" @bind="decimalInput" placeholder="Indtast fx 192.168.0.1 eller 42" />
+                    <button class="btn btn-primary w-100" @onclick="ConvertDecimalToBinary">Konverter</button>
+                    <div class="mt-3">
+                        <strong>Resultat:</strong>
+                        <p class="text-success">@binaryResult</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-
-<div class="iframe-container">
-    <iframe 
-        src="https://mercantec.notion.site/ebd/112dab5ca237807fb757e18a0b3ba76f" 
-        class="responsive-iframe"
-        title="Binærkodeomformer opgavebeskrivelse"
-        loading="lazy"
-        allowfullscreen>
-    </iframe>
+        <!-- Binary/IPv4 → Base10 -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Binær eller Binær IPv4 → Base10</h5>
+                    <input class="form-control mb-2" @bind="binaryInput" placeholder="Indtast fx 11000000.10101000.00000000.00000001" />
+                    <button class="btn btn-success w-100" @onclick="ConvertBinaryToDecimal">Konverter</button>
+                    <div class="mt-3">
+                        <strong>Resultat:</strong>
+                        <p class="text-success">@decimalResult</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
-.office-hero {
-    background: linear-gradient(90deg, #3a0647 0%, #1b6ec2 100%);
-    color: #fff;
-    border-radius: 0 0 2rem 2rem;
-    box-shadow: 0 4px 32px rgba(58,6,71,0.10);
-}
-.iframe-container {
-    position: relative;
-    width: 100%;    
-    padding-top: 56.25%; /* 16:9 Aspect Ratio */
-    margin: 20px 0;
-}
-.responsive-iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
+    .office-hero {
+        background: linear-gradient(90deg, #3a0647 0%, #1b6ec2 100%);
+        color: #fff;
+        border-radius: 0 0 2rem 2rem;
+        box-shadow: 0 4px 32px rgba(58,6,71,0.10);
+    }
 </style>
+
+@code {
+    private string decimalInput = "";
+    private string binaryInput = "";
+    private string binaryResult = "";
+    private string decimalResult = "";
+
+    // Base10/IPv4 → Binary
+    private void ConvertDecimalToBinary()
+    {
+        string cleanInput = RemoveNonNumericOrDot(decimalInput);
+
+        if (string.IsNullOrWhiteSpace(cleanInput))
+        {
+            binaryResult = "Ugyldigt input.";
+            return;
+        }
+
+        if (cleanInput.Contains('.'))
+        {
+            binaryResult = IPv4ToBinary(cleanInput);
+        }
+        else if (int.TryParse(cleanInput, out int number))
+        {
+            binaryResult = DecimalToBinary(number);
+        }
+        else
+        {
+            binaryResult = "Kun tal og punktummer er tilladt.";
+        }
+    }
+
+    // Binary/IPv4 → Base10
+    private void ConvertBinaryToDecimal()
+    {
+        string cleanInput = RemoveNonNumericOrDot(binaryInput);
+
+        if (string.IsNullOrWhiteSpace(cleanInput))
+        {
+            decimalResult = "Ugyldigt input.";
+            return;
+        }
+
+        if (cleanInput.Contains('.'))
+        {
+            decimalResult = BinaryToIPv4(cleanInput);
+        }
+        else
+        {
+            decimalResult = BinaryToDecimal(cleanInput).ToString();
+        }
+    }
+
+    // ----------------- Løsnings Metoder ------------------
+
+    private static string RemoveNonNumericOrDot(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return "";
+
+        char[] allowedChars = input.Where(c => char.IsDigit(c) || c == '.').ToArray();
+        return new string(allowedChars);
+    }
+
+    private static string DecimalToBinary(int number)
+    {
+        if (number == 0) return "0";
+        string result = "";
+
+        while (number > 0)
+        {
+            result = (number % 2) + result;
+            number /= 2;
+        }
+
+        return result;
+    }
+
+    private static int BinaryToDecimal(string binary)
+    {
+        int result = 0;
+        int power = 1;
+
+        for (int i = binary.Length - 1; i >= 0; i--)
+        {
+            if (binary[i] == '1')
+                result += power;
+
+            power *= 2;
+        }
+
+        return result;
+    }
+
+    private static string IPv4ToBinary(string ipv4)
+    {
+        string[] parts = ipv4.Split('.');
+        string[] binaryParts = new string[parts.Length];
+
+        for (int i = 0; i < parts.Length; i++)
+        {
+            int number = int.Parse(parts[i]);
+            string binary = DecimalToBinary(number).PadLeft(8, '0');
+            binaryParts[i] = binary;
+        }
+
+        return string.Join(".", binaryParts);
+    }
+
+    private static string BinaryToIPv4(string binaryIP)
+    {
+        string[] parts = binaryIP.Split('.');
+        string[] decimalParts = new string[parts.Length];
+
+        for (int i = 0; i < parts.Length; i++)
+        {
+            int decimalNumber = BinaryToDecimal(parts[i]);
+            decimalParts[i] = decimalNumber.ToString();
+        }
+
+        return string.Join(".", decimalParts);
+    }
+}

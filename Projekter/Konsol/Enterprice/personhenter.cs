@@ -1,0 +1,177 @@
+﻿using System;
+using System.Collections.Generic;
+using System.DirectoryServices.Protocols;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+namespace Enterprice
+{
+    public class UserADService
+    {
+        public  List<ADuser> GetAllUsers()
+        {
+            Console.WriteLine("Getting all users");
+            // Opret en tom liste til at gemme alle AD brugere
+            var users = new List<ADuser>();
+            // Opret forbindelse til Active Directory
+            using (var connection = ADService.Connect())
+            {
+                // Definer søgningen:
+                // - Hvor skal vi søge: i "mags.local" domænet
+                // - Hvad søger vi efter: alle objekter af typen "user"
+                // - Hvilke informationer vil vi have: 
+                // - brugernavn (sAMAccountName) og fulde navn (displayName)
+                var searchRequest = new SearchRequest(
+                    "DC=mags,DC=local", // Søg i dette domæne
+                    "(objectClass=user)", // Find alle brugere
+                    SearchScope.Subtree, // Søg i hele domænet
+                    "sAMAccountName", // Brugernavn
+                    "displayName" // Fulde navn
+                );
+                try
+                {
+                    // Udfør søgningen
+                    var response = (SearchResponse)connection.SendRequest(searchRequest);
+                    Console.WriteLine($"Søgningen returnerede {response.Entries.Count} brugere.");
+                    // For hver bruger vi finder
+                    foreach (SearchResultEntry bruger in response.Entries)
+                    {
+                        // Opret et nyt ADUser objekt med informationerne
+                        var nyBruger = new ADuser
+                        {
+                            // Hvis værdien ikke findes, brug "N/A" som standard
+                            UserName = bruger.Attributes["sAMAccountName"]?[0]?.ToString() ?? "N/A",
+                            FullName = bruger.Attributes["displayName"]?[0]?.ToString() ?? "N/A",
+                            Email = bruger.Attributes["mail"]?[0]?.ToString() ?? "N/A"
+                        };
+                        // Tilføj brugeren til vores liste
+                        users.Add(nyBruger);
+                        Console.WriteLine($"Tilføjet bruger: {nyBruger.UserName} - {nyBruger.FullName}");
+                    }
+                    Console.WriteLine("Alle brugere er nu hentet og tilføjet til listen.");
+                  
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Fejl under hentning af brugere: {ex.Message}");
+                }
+                return users;
+
+            }
+
+        }
+
+        // ---------------------------------------------------------------
+        // INTERAKTIV BRUGEROPRETTELSE (bruges fra menuen)
+        // ---------------------------------------------------------------
+        public static void CreateUserInteractive()
+        {
+            Console.WriteLine("=== CREATE NEW AD USER ===");
+
+            Console.Write("Username: ");
+            string username = Console.ReadLine();
+
+            Console.Write("Password: ");
+            string password = Console.ReadLine();
+
+            Console.Write("First name: ");
+            string firstName = Console.ReadLine();
+
+            Console.Write("Last name: ");
+            string lastName = Console.ReadLine();
+
+            Console.Write("Email: ");
+            string email = Console.ReadLine();
+
+            try
+            {
+                CreateUser("OU=Users,DC=mags,DC=local", username, password, firstName, lastName, email);
+                Console.WriteLine("User created successfully!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating user: {ex.Message}");
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // SELVE LDAP-OPRETTELSEN
+        // ---------------------------------------------------------------
+        public static void CreateUser(
+            string ouPath,
+            string username,
+            string password,
+            string firstName,
+            string lastName,
+            string email)
+        {
+            var credential = new NetworkCredential("CRUD",")e=4To!3@(SKLnCPWLz'[8");
+
+            var connection = new LdapConnection("10.133.71.100")
+            {
+                Credential = credential,
+                AuthType = AuthType.Negotiate,
+                SessionOptions =
+            {
+                SecureSocketLayer = false // LDAPS required for unicodePwd
+            }
+            };
+
+            // Connect + bind
+            connection.Bind();
+
+            // Define DN path where user will be created
+            string dn = $"CN={firstName} {lastName},{ouPath}";
+
+            // Create the user object (disabled)
+            var addRequest = new AddRequest(
+                dn,
+                new DirectoryAttribute("objectClass", "user"),
+                new DirectoryAttribute("sAMAccountName", username),
+                new DirectoryAttribute("userPrincipalName", $"{username}@mags.local"),
+                new DirectoryAttribute("givenName", firstName),
+                new DirectoryAttribute("sn", lastName),
+                new DirectoryAttribute("displayName", $"{firstName} {lastName}"),
+                new DirectoryAttribute("mail", email),
+                new DirectoryAttribute("userAccountControl", "514") // disabled
+            );
+
+            connection.SendRequest(addRequest);
+
+            // Set password (UNICODE + \" \")
+            string quotedPassword = $"\"{password}\"";
+            byte[] pwdBytes = Encoding.Unicode.GetBytes(quotedPassword);
+
+            var passwordRequest = new ModifyRequest(
+                dn,
+                DirectoryAttributeOperation.Replace,
+                "unicodePwd",
+                pwdBytes
+            );
+
+            connection.SendRequest(passwordRequest);
+
+            // Enable account
+            var enableRequest = new ModifyRequest(
+                dn,
+                DirectoryAttributeOperation.Replace,
+                "userAccountControl",
+                "512" // NORMAL_ACCOUNT
+            );
+
+            connection.SendRequest(enableRequest);
+
+            connection.Dispose();
+        }
+    }
+    public class ADuser
+    {
+        public string UserName { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+       
+    }
+}
+
