@@ -6,13 +6,13 @@ namespace Enterprice
 {
     public class ADService
     {
-        private static string _server = "10.133.71.100";
-        private static string _username = "CRUD";
-        private static string _password = ")e=4To!3@(SKLnCPWLz'[8!";
-        private static string _domain = "mags.local";
+        public static string _server = "10.133.71.100";
+        public static string _username = "adReader";
+        public static string _password = "Merc1234!";
+        public static string _domain = "mags.local";
 
         // Opret forbindelse til AD med credential + bind test
-        public static LdapConnection Connect()
+        public static LdapConnection ConnectGet()
         {
             try
             {

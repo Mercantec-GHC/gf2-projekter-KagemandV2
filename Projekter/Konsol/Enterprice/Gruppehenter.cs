@@ -11,7 +11,7 @@ namespace Enterprice
         {
             var groups = new List<ADGroup>();
 
-            using (var connection = ADService.Connect())
+            using (var connection = ADService.ConnectGet())
             {
                 var search = new SearchRequest(
                     "DC=mags,DC=local",
@@ -38,11 +38,11 @@ namespace Enterprice
         }
 
         // Hent MEDLEMMERNE af en specifik gruppe
-        public static List<ADuser> GetMembersOfGroup(string groupName)
+        public static List<ADUser> GetMembersOfGroup(string groupName)
         {
-            var members = new List<ADuser>();
+            var members = new List<ADUser>();
 
-            using (var connection = ADService.Connect())
+            using (var connection = ADService.ConnectGet())
             {
                 // Find gruppen og dens "member" attribut
                 var groupSearch = new SearchRequest(
@@ -87,7 +87,7 @@ namespace Enterprice
                         if (userResponse.Entries.Count > 0)
                         {
                             var u = userResponse.Entries[0];
-                            members.Add(new ADuser
+                            members.Add(new ADUser
                             {
                                 UserName = u.Attributes["sAMAccountName"]?[0]?.ToString() ?? "N/A",
                                 FullName = u.Attributes["displayName"]?[0]?.ToString() ?? "N/A",

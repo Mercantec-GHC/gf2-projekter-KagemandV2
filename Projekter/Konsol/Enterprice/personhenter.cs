@@ -10,13 +10,13 @@ namespace Enterprice
 {
     public class UserADService
     {
-        public  List<ADuser> GetAllUsers()
+        public  List<ADUser> GetAllUsers()
         {
             Console.WriteLine("Getting all users");
             // Opret en tom liste til at gemme alle AD brugere
-            var users = new List<ADuser>();
+            var users = new List<ADUser>();
             // Opret forbindelse til Active Directory
-            using (var connection = ADService.Connect())
+            using (var connection = ADService.ConnectGet())
             {
                 // Definer søgningen:
                 // - Hvor skal vi søge: i "mags.local" domænet
@@ -39,7 +39,7 @@ namespace Enterprice
                     foreach (SearchResultEntry bruger in response.Entries)
                     {
                         // Opret et nyt ADUser objekt med informationerne
-                        var nyBruger = new ADuser
+                        var nyBruger = new ADUser
                         {
                             // Hvis værdien ikke findes, brug "N/A" som standard
                             UserName = bruger.Attributes["sAMAccountName"]?[0]?.ToString() ?? "N/A",
@@ -87,7 +87,7 @@ namespace Enterprice
 
             try
             {
-                CreateUser("OU=Users,DC=mags,DC=local", username, password, firstName, lastName, email);
+                CreateUser("DC=mags,DC=local", username, password, firstName, lastName, email);
                 Console.WriteLine("User created successfully!");
             }
             catch (Exception ex)
@@ -115,11 +115,12 @@ namespace Enterprice
                 AuthType = AuthType.Negotiate,
                 SessionOptions =
             {
-                SecureSocketLayer = false // LDAPS required for unicodePwd
+                // LDAPS required for unicodePwd
+                SecureSocketLayer = false 
             }
             };
 
-            // Connect + bind
+            // ConnectGet + bind
             connection.Bind();
 
             // Define DN path where user will be created
@@ -166,7 +167,7 @@ namespace Enterprice
             connection.Dispose();
         }
     }
-    public class ADuser
+    public class ADUser
     {
         public string UserName { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
