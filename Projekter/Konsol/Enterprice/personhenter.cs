@@ -10,11 +10,11 @@ namespace Enterprice
 {
     public class UserADService
     {
-        public  List<ADUser> GetAllUsers()
+        public  List<ADuser> GetAllUsers()
         {
             Console.WriteLine("Getting all users");
             // Opret en tom liste til at gemme alle AD brugere
-            var users = new List<ADUser>();
+            var users = new List<ADuser>();
             // Opret forbindelse til Active Directory
             using (var connection = ADService.ConnectGet())
             {
@@ -39,7 +39,7 @@ namespace Enterprice
                     foreach (SearchResultEntry bruger in response.Entries)
                     {
                         // Opret et nyt ADUser objekt med informationerne
-                        var nyBruger = new ADUser
+                        var nyBruger = new ADuser
                         {
                             // Hvis værdien ikke findes, brug "N/A" som standard
                             UserName = bruger.Attributes["sAMAccountName"]?[0]?.ToString() ?? "N/A",
@@ -87,7 +87,7 @@ namespace Enterprice
 
             try
             {
-                CreateUser("DC=mags,DC=local", username, password, firstName, lastName, email);
+                CreateUser("CN=Users,DC=mags,DC=local", username, password, firstName, lastName, email);
                 Console.WriteLine("User created successfully!");
             }
             catch (Exception ex)
@@ -167,7 +167,7 @@ namespace Enterprice
             connection.Dispose();
         }
     }
-    public class ADUser
+    public class ADuser
     {
         public string UserName { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;

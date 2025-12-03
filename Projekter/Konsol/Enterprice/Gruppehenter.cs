@@ -38,9 +38,9 @@ namespace Enterprice
         }
 
         // Hent MEDLEMMERNE af en specifik gruppe
-        public static List<ADUser> GetMembersOfGroup(string groupName)
+        public static List<ADuser> GetMembersOfGroup(string groupName)
         {
-            var members = new List<ADUser>();
+            var members = new List<ADuser>();
 
             using (var connection = ADService.ConnectGet())
             {
@@ -87,7 +87,7 @@ namespace Enterprice
                         if (userResponse.Entries.Count > 0)
                         {
                             var u = userResponse.Entries[0];
-                            members.Add(new ADUser
+                            members.Add(new ADuser
                             {
                                 UserName = u.Attributes["sAMAccountName"]?[0]?.ToString() ?? "N/A",
                                 FullName = u.Attributes["displayName"]?[0]?.ToString() ?? "N/A",
