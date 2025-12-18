@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.DirectoryServices.ActiveDirectory;
 using System.DirectoryServices.Protocols;
 using System.Linq;
 using System.Net;
@@ -8,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 namespace Enterprice
 {
+  
     public class UserADService
     {
         public  List<ADuser> GetAllUsers()
@@ -28,7 +30,10 @@ namespace Enterprice
                     "(objectClass=user)", // Find alle brugere
                     SearchScope.Subtree, // Søg i hele domænet
                     "sAMAccountName", // Brugernavn
-                    "displayName" // Fulde navn
+                    "displayName", // Fulde navn
+                    "mail", // Email
+                    "lastLogon" // Sidste login tidspunkt
+
                 );
                 try
                 {
@@ -39,12 +44,25 @@ namespace Enterprice
                     foreach (SearchResultEntry bruger in response.Entries)
                     {
                         // Opret et nyt ADUser objekt med informationerne
+                        DateTime? lastLogin = null;
+
+                        if (bruger.Attributes.Contains("lastLogon"))
+                        {
+                            var rawValue = bruger.Attributes["lastLogon"][0];
+
+                            if (rawValue != null && long.TryParse(rawValue.ToString(), out long fileTime))
+                            {
+                                lastLogin = DateTime.FromFileTimeUtc(fileTime);
+                            }
+                        }
+
+
                         var nyBruger = new ADuser
                         {
-                            // Hvis værdien ikke findes, brug "N/A" som standard
                             UserName = bruger.Attributes["sAMAccountName"]?[0]?.ToString() ?? "N/A",
                             FullName = bruger.Attributes["displayName"]?[0]?.ToString() ?? "N/A",
-                            Email = bruger.Attributes["mail"]?[0]?.ToString() ?? "N/A"
+                            Email = bruger.Attributes["mail"]?[0]?.ToString() ?? "N/A",
+                            LastLogin = lastLogin
                         };
                         // Tilføj brugeren til vores liste
                         users.Add(nyBruger);
@@ -166,13 +184,123 @@ namespace Enterprice
 
             connection.Dispose();
         }
-    }
-    public class ADuser
-    {
+        public static ADuser GetUserLastLogin(string username)
+        {
+            using var connection = ADService.ConnectGet();
+
+            // LDAP-søgning efter brugeren
+            var searchRequest = new SearchRequest(
+                "DC=mags,DC=local",
+                $"(sAMAccountName={username})",
+                SearchScope.Subtree,
+                "sAMAccountName",
+                "displayName",
+                "mail",
+                "lastLogon"
+            );
+
+            var response = (SearchResponse)connection.SendRequest(searchRequest);
+
+            if (response.Entries.Count == 0)
+                throw new Exception("User not found");
+
+            var entry = response.Entries[0];
+
+            DateTime? lastLogin = null;
+
+            // lastLogonTimestamp er OPTIONAL
+            if (entry.Attributes.Contains("lastLogon"))
+            {
+                long fileTime = (long)entry.Attributes["lastLogon"][0];
+                lastLogin = DateTime.FromFileTimeUtc(fileTime);
+            }
+
+            return new ADuser
+            {
+                UserName = entry.Attributes["sAMAccountName"]?[0]?.ToString() ?? "N/A",
+                FullName = entry.Attributes["displayName"]?[0]?.ToString() ?? "N/A",
+                Email = entry.Attributes["mail"]?[0]?.ToString() ?? "N/A",
+                LastLogin = lastLogin
+            };
+        }
+
+        public static bool AuthenticateUser(string username, string password)
+        {
+            try
+            {
+                // Opret credentials med brugerens login
+                var credential = new NetworkCredential(
+                    $"{username}@{ADService.Domain}", // bruger@domæne
+                    password
+                );
+
+                // Opret LDAP forbindelse
+                var connection = new LdapConnection(ADService.Server)
+                {
+                    Credential = credential,
+                    AuthType = AuthType.Negotiate
+                };
+
+                // Forsøger at logge ind (bind)
+                connection.Bind();
+
+                // Hvis vi når hertil → login er korrekt
+                return true;
+            }
+            catch (LdapException)
+            {
+                // Forkert brugernavn / kodeord / konto låst
+                return false;
+            }
+        }
+        public static void CreateGuestContact(
+            string containerDn,    // Fx "CN=Users,DC=mags,DC=local"
+            string fullName,
+            string company,
+            string visitReason,
+            string email = null
+)
+        {
+            // Brug jeres eksisterende globale AD credentials
+            using var connection = ADService.ConnectGet();
+
+            // DN for kontakten (Contacts bruger CN – ikke OU)
+            string dn = $"CN={fullName},{containerDn}";
+
+            // Opret Contact objektet
+            var addRequest = new AddRequest(
+                dn,
+                new DirectoryAttribute("objectClass", "contact"),
+                new DirectoryAttribute("cn", fullName),
+                new DirectoryAttribute("displayName", fullName),
+                new DirectoryAttribute("company", company),
+                new DirectoryAttribute("description", visitReason)
+            );
+
+            // Email er valgfri
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                addRequest.Attributes.Add(
+                    new DirectoryAttribute("mail", email)
+                );
+            }
+
+            // Send LDAP-requesten
+            connection.SendRequest(addRequest);
+        }
+
+        public class ADuser
+        {
         public string UserName { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-       
+
+        public DateTime? LastLogin { get; set; }
+
+        }
     }
 }
+
+
+
 

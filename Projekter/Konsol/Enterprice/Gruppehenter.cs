@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.DirectoryServices.Protocols;
+using System.Text;
+using static Enterprice.UserADService;
 
 namespace Enterprice
 {
@@ -71,8 +73,13 @@ namespace Enterprice
                 // For hvert medlem → hent deres info
                 foreach (var dn in memberList)
                 {
+                    // Convert object → byte[] → string DN
+                    string dnString = Encoding.UTF8.GetString((byte[])dn);
+
+                    Console.WriteLine($"DN FOUND: {dnString}");
+
                     var userSearch = new SearchRequest(
-                        dn.ToString(),
+                        dnString,                     // <-- use converted DN
                         "(objectClass=user)",
                         SearchScope.Base,
                         "sAMAccountName",
@@ -97,8 +104,7 @@ namespace Enterprice
                     }
                     catch
                     {
-                        // Nogle "member" entries kan være computere, grupper osv.
-                        continue;
+                        continue; // If member = group/computer
                     }
                 }
             }
