@@ -261,8 +261,18 @@ namespace Enterprice
             string email = null
 )
         {
-            // Brug jeres eksisterende globale AD credentials
-            using var connection = ADService.ConnectGet();
+            var credential = new NetworkCredential("CRUD", ")e=4To!3@(SKLnCPWLz'[8");
+
+            var connection = new LdapConnection("10.133.71.100")
+            {
+                Credential = credential,
+                AuthType = AuthType.Negotiate,
+                SessionOptions =
+            {
+                // LDAPS required for unicodePwd
+                SecureSocketLayer = false
+            }
+            };
 
             // DN for kontakten (Contacts bruger CN – ikke OU)
             string dn = $"CN={fullName},{containerDn}";
@@ -288,6 +298,60 @@ namespace Enterprice
             // Send LDAP-requesten
             connection.SendRequest(addRequest);
         }
+        public static void ViewGuest()
+        {
+            Console.WriteLine("=== GUEST CONTACTS ===");
+
+            using var connection = ADService.ConnectGet();
+
+            // LDAP-søgning efter Contacts (gæster)
+            var searchRequest = new SearchRequest(
+                "DC=mags,DC=local",          // Brug global base DN senere
+                "(objectClass=contact)",     // Contacts = gæster (ingen login)
+                SearchScope.Subtree,
+                "cn",                        // Navn
+                "displayName",               // Fuldt navn (hvis sat)
+                "company",                   // Firma
+                "description",               // Grund for besøg
+                "whenCreated"                // Hvornår oprettet
+            );
+
+            var response = (SearchResponse)connection.SendRequest(searchRequest);
+
+            if (response.Entries.Count == 0)
+            {
+                Console.WriteLine("No guests found.");
+                return;
+            }
+
+            foreach (SearchResultEntry entry in response.Entries)
+            {
+                string name =
+                    entry.Attributes["displayName"]?[0]?.ToString()
+                    ?? entry.Attributes["cn"]?[0]?.ToString()
+                    ?? "N/A";
+
+                string company =
+                    entry.Attributes["company"]?[0]?.ToString() ?? "N/A";
+
+                string reason =
+                    entry.Attributes["description"]?[0]?.ToString() ?? "N/A";
+
+                DateTime created = DateTime.MinValue;
+                if (entry.Attributes.Contains("whenCreated"))
+                {
+                    created = DateTime.Parse(entry.Attributes["whenCreated"][0].ToString());
+                }
+
+                Console.WriteLine("----------------------------------");
+                Console.WriteLine($"Name       : {name}");
+                Console.WriteLine($"Company    : {company}");
+                Console.WriteLine($"Reason     : {reason}");
+                Console.WriteLine($"Created    : {created}");
+            }
+        }
+
+           
 
         public class ADuser
         {

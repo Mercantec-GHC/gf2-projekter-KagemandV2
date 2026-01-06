@@ -133,8 +133,12 @@ namespace Enterprice
                         Console.WriteLine("Gæstekontakt oprettet successfully.");
                         break;
 
-
                     case "8":
+                        UserADService.ViewGuest();
+                        break;
+
+
+                    case "9":
                         return;
                 }
 
@@ -153,7 +157,8 @@ namespace Enterprice
             Console.WriteLine("5. Get user login/check in time");
             Console.WriteLine("6. Check in");
             Console.WriteLine("7. Gæstebog");
-            Console.WriteLine("8. Exit");
+            Console.WriteLine("8. See all guests");
+            Console.WriteLine("9. Exit");
         }
 
      
